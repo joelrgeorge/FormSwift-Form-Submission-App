@@ -16,5 +16,9 @@ COPY . .
 # 6. Expose the port your app uses
 EXPOSE 5000
 
-# 7. Start the server
+# 7. Docker container healthcheck
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD wget -qO- http://localhost:3005/health || exit 1
+
+# 8. Start the server
 CMD ["node", "server.js"]

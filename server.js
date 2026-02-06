@@ -50,6 +50,23 @@ const port = process.env.PORT || 3005;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Health check endpoint
+app.get("/health", (req, res) => {
+  const dbState = mongoose.connection.readyState;
+
+  const statusMap = {
+    0: "disconnected",
+    1: "connected",
+    2: "connecting",
+    3: "disconnecting",
+  };
+
+  res.status(dbState === 1 ? 200 : 500).json({
+    status: "ok",
+    database: statusMap[dbState],
+  });
+});
+
 // Serve static files from the 'public' directory
 app.use(express.static('public'));
 
