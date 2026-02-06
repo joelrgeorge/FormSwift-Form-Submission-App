@@ -6,11 +6,43 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
+const dotenv = require("dotenv");
 const path = require('path');
 const fs = require('fs'); // Require the 'fs' module
 const ReactDOMServer = require('react-dom/server');
 const React = require('react');
 const { Container } = require('reactstrap');
+
+const requiredEnv = [
+  "MONGO_URI",
+  "EMAIL_HOST",
+  "EMAIL_PORT",
+  "EMAIL_USER",
+  "EMAIL_PASS",
+  "EMAIL_FROM",
+  "EMAIL_TO"
+];
+
+dotenv.config({ quiet: true });
+
+requiredEnv.forEach((key) => {
+  if (!process.env[key]) {
+    console.error(`❌ ${key} is not defined. Please check your .env file.`);
+    process.exit(1);
+  }
+});
+
+// (Optional but recommended)
+const PORT = process.env.PORT || 3005;
+
+// ✅ Mongo connection only happens AFTER validation
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err.message);
+    process.exit(1);
+  });
 
 const app = express();
 const port = process.env.PORT || 3005;
@@ -20,16 +52,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Serve static files from the 'public' directory
 app.use(express.static('public'));
-
-const username = 'mern_user';
-const password = 'hAhDa1kQMQ0FEhck';
-const dbName = 'cluster0';
-const uri = `mongodb+srv://${username}:${password}@cluster0.qkrprta.mongodb.net/${dbName}?retryWrites=true&w=majority`;
-
-mongoose.connect(uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
 
 const bookingSchema = new mongoose.Schema({
   name: String,
@@ -42,12 +64,19 @@ const bookingSchema = new mongoose.Schema({
 
 const Booking = mongoose.model('Booking', bookingSchema);
 
+// ✅ EMAIL ENV VALIDATION
+if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+  console.error("❌ Email credentials are not defined. Please check your .env file.");
+  process.exit(1);
+}
+
 const smtpTransporter = nodemailer.createTransport({
-  host: 'smtpout.secureserver.net',
-  port: 587,
+  host: process.env.EMAIL_HOST,
+  port: process.env.EMAIL_PORT,
+  secure: false, // true for 465, false for 587
   auth: {
-    user: 'enquiry@ebenezerservicedapartments.com',
-    pass: 'Bluelegion@19',
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
@@ -59,8 +88,8 @@ app.post('/submit_booking', async (req, res) => {
     await booking.save();
 
     const mailOptions = {
-      from: 'enquiry@ebenezerservicedapartments.com',
-      to: 'enquiry@ebenezerservicedapartments.com',
+      from: process.env.EMAIL_FROM,
+      to: process.env.EMAIL_TO,
       subject: 'New Booking',
       text: JSON.stringify(formData, null, 2),
     };

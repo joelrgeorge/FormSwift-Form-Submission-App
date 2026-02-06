@@ -40,10 +40,77 @@ npm install
 1. Start the server:
 npm start
 
-
 2. Access the application in your web browser at `http://localhost:3005`.
 
 3. Submit booking requests through the provided form.
+
+## Running with Docker
+
+This project is designed to run as a Dockerized backend service.
+
+### Build the Docker image
+docker build -t formswift .
+
+Run the container
+docker run --env-file .env -p 3005:3005 formswift
+
+Once running, the API will be available at:
+
+http://localhost:3005
+
+
+Why this is powerful:
+- Shows you understand deployment
+
+- One-command reproducibility
+
+---
+
+## Running with Docker Compose
+
+Docker Compose can be used to run FormSwift along with MongoDB.
+
+docker-compose up
+
+This will start:
+
+1. FormSwift API
+
+2. MongoDB service
+
+The API will be available at:
+
+http://localhost:3005
+
+---
+
+## API usage example
+
+## Example Usage
+
+A simple HTML form integration:
+
+```html
+<form method="POST" action="http://localhost:3005/submit">
+  <input name="name" placeholder="Name" />
+  <input name="email" placeholder="Email" />
+  <button type="submit">Submit</button>
+</form>
+
+```
+
+---
+
+## Project Notes
+
+FormSwift is intended to be used as a backend integration service and is not a standalone frontend application.
+
+It can be integrated into:
+- Static websites
+
+- React / Vue / Angular apps
+
+- CMS platforms such as WordPress
 
 ## License
 
