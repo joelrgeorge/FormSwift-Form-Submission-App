@@ -58,12 +58,6 @@ Once running, the API will be available at:
 
 http://localhost:3005
 
-
-Why this is powerful:
-- Shows you understand deployment
-
-- One-command reproducibility
-
 ---
 
 ## Running with Docker Compose
